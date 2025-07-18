@@ -1,0 +1,95 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"charactersheet": {
+		"charname": "Nome Personaggio",
+		"misc": {
+			"classlevel": "Classe & Livello",
+			"background": "Background",
+			"playername": "Nome Giocatore",
+			"race": "Razza",
+			"alignment": "Allineamento",
+			"experience": "Punti Esperienza"
+		},
+		"score": {
+			"strenght": "Forza",
+			"dexterity": "Destrezza",
+			"constitution": "Costituzione",
+			"intelligence": "Intelligenza",
+			"wisdom": "Saggezza",
+			"charisma": "Carisma"
+		},
+		"inspiration": "Inspirazione",
+		"proficiencybonus": "Bonus di Competenza",
+		"savingthrows": "Tiri Salvezza",
+		"skill": {
+			"": "Abilità",
+			"athletics": "Atletica",
+			"acrobatics": "Acrobazia",
+			"sleightofhand": "Rapidità di Mano",
+			"stealth": "Indagare",
+			"arcana": "Arcano",
+			"history": "Storia",
+			"investigation": "Indagare",
+			"nature": "Natura",
+			"religion": "Religione",
+			"animalhandling": "Addestrare Animali",
+			"insight": "Intuizione",
+			"medicine": "Medicina",
+			"perception": "Percezione",
+			"survival": "Sopravvivenza",
+			"deception": "Inganno",
+			"intimidation": "Intimidire",
+			"performance": "Intrattenere",
+			"persuasion": "Persuasione"
+		},
+		"passiveperception": "Percezione Passiva",
+		"otherprofs": "Altre Competenze e Linguaggi",
+		"combat": {
+			"ac": "Classe Armatura",
+			"initiative": "Bonus Iniziativa",
+			"speed": "Velocità",
+			"maxhp": "Punti Ferita Massimi",
+			"currenthp": "Punti Ferita Attuali",
+			"temphp": "Punti Ferita Temporanei",
+			"hitdice": {
+				"total": "Totali",
+				"remaning": "Dadi Vita"
+			},
+			"deathsaves": {
+				"": "Tiri su Morte",
+				"success": "Successi",
+				"faliure": "Fallimenti"
+			}
+		},
+		"attacksandspellcasting": {
+			"": "Attacchi & Incantesimi",
+			"name": "Nome",
+			"bonus": "Bonus att.",
+			"damage": "Danni/Tipo"
+		},
+		"equipment": {
+			"": "Equipaggiamento",
+			"coin": {
+				"abbr": {
+					"copper": "mr",
+					"silver": "ma",
+					"electrum": "me",
+					"gold": "mo",
+					"platinum": "mp"
+				},
+				"copper": "Monete di Rame",
+				"silver": "Monete di Argento",
+				"electrum": "Monete di Electrum",
+				"gold": "Monete d'Oro",
+				"platinum": "Monete di Platino"
+			}
+		},
+		"flavor": {
+			"personality": "Tratti Caratteriali",
+			"ideals": "Ideali",
+			"bonds": "Legami",
+			"flaws": "Difetti"
+		},
+		"features": "Privilegi & Tratti"
+	}
+}

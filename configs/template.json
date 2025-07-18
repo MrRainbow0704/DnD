@@ -1,0 +1,14 @@
+{
+  "host": "127.0.0.1",
+  "port": "8080",
+  "dbPath": "db.sqlite3",
+  "cacheTime": 600,
+  "passwordPepper": "INSERT PEPPER HERE",
+  "passwordTime": 3,
+  "passwordMemory": 12288,
+  "passwordThreads": 1,
+  "passwordKeyLen": 64,
+  "passwordSaltLen": 16,
+  "jwtKey": "INSERT JWT KEY HERE",
+  "jwtMaxAge": 3600
+}
