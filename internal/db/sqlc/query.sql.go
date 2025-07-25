@@ -9,6 +9,119 @@ import (
 	"context"
 )
 
+const addCharacterToCampaign = `-- name: AddCharacterToCampaign :one
+INSERT INTO campaigns_characters (character, campaign)
+VALUES (?1, ?2)
+RETURNING character, campaign
+`
+
+// AddCharacterToCampaign
+//
+//	INSERT INTO campaigns_characters (character, campaign)
+//	VALUES (?1, ?2)
+//	RETURNING character, campaign
+func (q *Queries) AddCharacterToCampaign(ctx context.Context, character int64, campaign int64) (CampaignsCharacter, error) {
+	row := q.db.QueryRowContext(ctx, addCharacterToCampaign, character, campaign)
+	var i CampaignsCharacter
+	err := row.Scan(&i.Character, &i.Campaign)
+	return i, err
+}
+
+const delCampaign = `-- name: DelCampaign :exec
+DELETE FROM campaigns
+WHERE id = ?1
+`
+
+// DelCampaign
+//
+//	DELETE FROM campaigns
+//	WHERE id = ?1
+func (q *Queries) DelCampaign(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, delCampaign, id)
+	return err
+}
+
+const delCharacter = `-- name: DelCharacter :exec
+DELETE FROM characters
+WHERE id = ?1
+`
+
+// DelCharacter
+//
+//	DELETE FROM characters
+//	WHERE id = ?1
+func (q *Queries) DelCharacter(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, delCharacter, id)
+	return err
+}
+
+const delCharacterScore = `-- name: DelCharacterScore :exec
+DELETE FROM character_scores
+WHERE id = ?1
+`
+
+// DelCharacterScore
+//
+//	DELETE FROM character_scores
+//	WHERE id = ?1
+func (q *Queries) DelCharacterScore(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, delCharacterScore, id)
+	return err
+}
+
+const delCharacterSpeed = `-- name: DelCharacterSpeed :exec
+DELETE FROM character_speeds
+WHERE id = ?1
+`
+
+// DelCharacterSpeed
+//
+//	DELETE FROM character_speeds
+//	WHERE id = ?1
+func (q *Queries) DelCharacterSpeed(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, delCharacterSpeed, id)
+	return err
+}
+
+const delUser = `-- name: DelUser :exec
+DELETE FROM users
+WHERE id = ?1
+`
+
+// DelUser
+//
+//	DELETE FROM users
+//	WHERE id = ?1
+func (q *Queries) DelUser(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, delUser, id)
+	return err
+}
+
+const getCampaign = `-- name: GetCampaign :one
+SELECT id, name, "desc", master
+FROM campaigns
+WHERE id = ?1
+LIMIT 1
+`
+
+// GetCampaign
+//
+//	SELECT id, name, "desc", master
+//	FROM campaigns
+//	WHERE id = ?1
+//	LIMIT 1
+func (q *Queries) GetCampaign(ctx context.Context, id int64) (Campaign, error) {
+	row := q.db.QueryRowContext(ctx, getCampaign, id)
+	var i Campaign
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Desc,
+		&i.Master,
+	)
+	return i, err
+}
+
 const getCharacter = `-- name: GetCharacter :one
 SELECT id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
 FROM characters
@@ -112,6 +225,35 @@ func (q *Queries) GetUserFromName(ctx context.Context, name string) (User, error
 	return i, err
 }
 
+const newCampaign = `-- name: NewCampaign :one
+INSERT INTO campaigns (name, master)
+VALUES (
+        ?1,
+        ?2
+    )
+RETURNING id, name, "desc", master
+`
+
+// NewCampaign
+//
+//	INSERT INTO campaigns (name, master)
+//	VALUES (
+//	        ?1,
+//	        ?2
+//	    )
+//	RETURNING id, name, "desc", master
+func (q *Queries) NewCampaign(ctx context.Context, name string, master int64) (Campaign, error) {
+	row := q.db.QueryRowContext(ctx, newCampaign, name, master)
+	var i Campaign
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Desc,
+		&i.Master,
+	)
+	return i, err
+}
+
 const newCharacter = `-- name: NewCharacter :one
 INSERT INTO characters (owner, name)
 VALUES (
@@ -167,6 +309,92 @@ func (q *Queries) NewCharacter(ctx context.Context, owner int64, name string) (C
 	return i, err
 }
 
+const newCharacterScore = `-- name: NewCharacterScore :one
+INSERT INTO character_scores (score, name, character, value, operation)
+VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        ?5
+    )
+RETURNING id, score, name, character, value, operation
+`
+
+// NewCharacterScore
+//
+//	INSERT INTO character_scores (score, name, character, value, operation)
+//	VALUES (
+//	        ?1,
+//	        ?2,
+//	        ?3,
+//	        ?4,
+//	        ?5
+//	    )
+//	RETURNING id, score, name, character, value, operation
+func (q *Queries) NewCharacterScore(ctx context.Context, score string, name string, character int64, value int64, operation interface{}) (CharacterScore, error) {
+	row := q.db.QueryRowContext(ctx, newCharacterScore,
+		score,
+		name,
+		character,
+		value,
+		operation,
+	)
+	var i CharacterScore
+	err := row.Scan(
+		&i.ID,
+		&i.Score,
+		&i.Name,
+		&i.Character,
+		&i.Value,
+		&i.Operation,
+	)
+	return i, err
+}
+
+const newCharacterSpeed = `-- name: NewCharacterSpeed :one
+INSERT INTO character_speeds (name, character, type, value, operation)
+VALUES (
+        ?1,
+        ?2,
+        ?3,
+        ?4,
+        ?5
+    )
+RETURNING id, character, value, name, type, operation
+`
+
+// NewCharacterSpeed
+//
+//	INSERT INTO character_speeds (name, character, type, value, operation)
+//	VALUES (
+//	        ?1,
+//	        ?2,
+//	        ?3,
+//	        ?4,
+//	        ?5
+//	    )
+//	RETURNING id, character, value, name, type, operation
+func (q *Queries) NewCharacterSpeed(ctx context.Context, name string, character int64, type_ interface{}, value int64, operation interface{}) (CharacterSpeed, error) {
+	row := q.db.QueryRowContext(ctx, newCharacterSpeed,
+		name,
+		character,
+		type_,
+		value,
+		operation,
+	)
+	var i CharacterSpeed
+	err := row.Scan(
+		&i.ID,
+		&i.Character,
+		&i.Value,
+		&i.Name,
+		&i.Type,
+		&i.Operation,
+	)
+	return i, err
+}
+
 const newUser = `-- name: NewUser :one
 INSERT INTO users (name, passwd, salt)
 VALUES (
@@ -199,21 +427,1515 @@ func (q *Queries) NewUser(ctx context.Context, name string, passwd []byte, salt 
 	return i, err
 }
 
-const setUserAdmin = `-- name: SetUserAdmin :one
+const removeCharacterFromCampaign = `-- name: RemoveCharacterFromCampaign :exec
+DELETE FROM campaigns_characters
+WHERE character = ?1
+    AND campaign = ?2
+`
+
+// RemoveCharacterFromCampaign
+//
+//	DELETE FROM campaigns_characters
+//	WHERE character = ?1
+//	    AND campaign = ?2
+func (q *Queries) RemoveCharacterFromCampaign(ctx context.Context, character int64, campaign int64) error {
+	_, err := q.db.ExecContext(ctx, removeCharacterFromCampaign, character, campaign)
+	return err
+}
+
+const setCampaignDesc = `-- name: SetCampaignDesc :one
+UPDATE campaigns
+SET desc = ?1
+WHERE id = ?2
+RETURNING id, name, "desc", master
+`
+
+// SetCampaignDesc
+//
+//	UPDATE campaigns
+//	SET desc = ?1
+//	WHERE id = ?2
+//	RETURNING id, name, "desc", master
+func (q *Queries) SetCampaignDesc(ctx context.Context, desc interface{}, iD int64) (Campaign, error) {
+	row := q.db.QueryRowContext(ctx, setCampaignDesc, desc, iD)
+	var i Campaign
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Desc,
+		&i.Master,
+	)
+	return i, err
+}
+
+const setCampaignName = `-- name: SetCampaignName :one
+UPDATE campaigns
+SET name = ?1
+WHERE id = ?2
+RETURNING id, name, "desc", master
+`
+
+// SetCampaignName
+//
+//	UPDATE campaigns
+//	SET name = ?1
+//	WHERE id = ?2
+//	RETURNING id, name, "desc", master
+func (q *Queries) SetCampaignName(ctx context.Context, name string, iD int64) (Campaign, error) {
+	row := q.db.QueryRowContext(ctx, setCampaignName, name, iD)
+	var i Campaign
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Desc,
+		&i.Master,
+	)
+	return i, err
+}
+
+const setCharacterAlignment = `-- name: SetCharacterAlignment :one
+UPDATE characters
+SET alignment = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterAlignment
+//
+//	UPDATE characters
+//	SET alignment = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterAlignment(ctx context.Context, alignment interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterAlignment, alignment, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterArmorClass = `-- name: SetCharacterArmorClass :one
+UPDATE characters
+SET armor_class = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterArmorClass
+//
+//	UPDATE characters
+//	SET armor_class = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterArmorClass(ctx context.Context, armorClass int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterArmorClass, armorClass, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterBackground = `-- name: SetCharacterBackground :one
+UPDATE characters
+SET background = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterBackground
+//
+//	UPDATE characters
+//	SET background = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterBackground(ctx context.Context, background interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterBackground, background, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterBonds = `-- name: SetCharacterBonds :one
+UPDATE characters
+SET bonds = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterBonds
+//
+//	UPDATE characters
+//	SET bonds = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterBonds(ctx context.Context, bonds interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterBonds, bonds, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCharismaProf = `-- name: SetCharacterCharismaProf :one
+UPDATE characters
+SET charisma_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCharismaProf
+//
+//	UPDATE characters
+//	SET charisma_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCharismaProf(ctx context.Context, charismaProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCharismaProf, charismaProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCoinsCopper = `-- name: SetCharacterCoinsCopper :one
+UPDATE characters
+SET coins_copper = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCoinsCopper
+//
+//	UPDATE characters
+//	SET coins_copper = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCoinsCopper(ctx context.Context, coinsCopper int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCoinsCopper, coinsCopper, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCoinsElectrum = `-- name: SetCharacterCoinsElectrum :one
+UPDATE characters
+SET coins_electrum = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCoinsElectrum
+//
+//	UPDATE characters
+//	SET coins_electrum = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCoinsElectrum(ctx context.Context, coinsElectrum int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCoinsElectrum, coinsElectrum, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCoinsGold = `-- name: SetCharacterCoinsGold :one
+UPDATE characters
+SET coins_gold = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCoinsGold
+//
+//	UPDATE characters
+//	SET coins_gold = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCoinsGold(ctx context.Context, coinsGold int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCoinsGold, coinsGold, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCoinsPlatinum = `-- name: SetCharacterCoinsPlatinum :one
+UPDATE characters
+SET coins_platinum = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCoinsPlatinum
+//
+//	UPDATE characters
+//	SET coins_platinum = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCoinsPlatinum(ctx context.Context, coinsPlatinum int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCoinsPlatinum, coinsPlatinum, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCoinsSilver = `-- name: SetCharacterCoinsSilver :one
+UPDATE characters
+SET coins_silver = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCoinsSilver
+//
+//	UPDATE characters
+//	SET coins_silver = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCoinsSilver(ctx context.Context, coinsSilver int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCoinsSilver, coinsSilver, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterConstitutionProf = `-- name: SetCharacterConstitutionProf :one
+UPDATE characters
+SET constitution_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterConstitutionProf
+//
+//	UPDATE characters
+//	SET constitution_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterConstitutionProf(ctx context.Context, constitutionProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterConstitutionProf, constitutionProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterCurrentHp = `-- name: SetCharacterCurrentHp :one
+UPDATE characters
+SET current_hp = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterCurrentHp
+//
+//	UPDATE characters
+//	SET current_hp = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterCurrentHp(ctx context.Context, currentHp int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterCurrentHp, currentHp, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterDeathFail = `-- name: SetCharacterDeathFail :one
+UPDATE characters
+SET death_fail = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterDeathFail
+//
+//	UPDATE characters
+//	SET death_fail = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterDeathFail(ctx context.Context, deathFail int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterDeathFail, deathFail, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterDeathSuccess = `-- name: SetCharacterDeathSuccess :one
+UPDATE characters
+SET death_success = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterDeathSuccess
+//
+//	UPDATE characters
+//	SET death_success = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterDeathSuccess(ctx context.Context, deathSuccess int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterDeathSuccess, deathSuccess, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterDexterityProf = `-- name: SetCharacterDexterityProf :one
+UPDATE characters
+SET dexterity_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterDexterityProf
+//
+//	UPDATE characters
+//	SET dexterity_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterDexterityProf(ctx context.Context, dexterityProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterDexterityProf, dexterityProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterEquipment = `-- name: SetCharacterEquipment :one
+UPDATE characters
+SET equipment = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterEquipment
+//
+//	UPDATE characters
+//	SET equipment = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterEquipment(ctx context.Context, equipment interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterEquipment, equipment, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterExperience = `-- name: SetCharacterExperience :one
+UPDATE characters
+SET experience = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterExperience
+//
+//	UPDATE characters
+//	SET experience = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterExperience(ctx context.Context, experience int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterExperience, experience, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterFlaws = `-- name: SetCharacterFlaws :one
+UPDATE characters
+SET flaws = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterFlaws
+//
+//	UPDATE characters
+//	SET flaws = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterFlaws(ctx context.Context, flaws interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterFlaws, flaws, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterIdeals = `-- name: SetCharacterIdeals :one
+UPDATE characters
+SET ideals = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterIdeals
+//
+//	UPDATE characters
+//	SET ideals = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterIdeals(ctx context.Context, ideals interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterIdeals, ideals, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterIntelligenceProf = `-- name: SetCharacterIntelligenceProf :one
+UPDATE characters
+SET intelligence_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterIntelligenceProf
+//
+//	UPDATE characters
+//	SET intelligence_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterIntelligenceProf(ctx context.Context, intelligenceProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterIntelligenceProf, intelligenceProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterMaxHp = `-- name: SetCharacterMaxHp :one
+UPDATE characters
+SET max_hp = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterMaxHp
+//
+//	UPDATE characters
+//	SET max_hp = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterMaxHp(ctx context.Context, maxHp int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterMaxHp, maxHp, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterName = `-- name: SetCharacterName :one
+UPDATE characters
+SET name = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterName
+//
+//	UPDATE characters
+//	SET name = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterName(ctx context.Context, name string, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterName, name, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterPersonality = `-- name: SetCharacterPersonality :one
+UPDATE characters
+SET personality = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterPersonality
+//
+//	UPDATE characters
+//	SET personality = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterPersonality(ctx context.Context, personality interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterPersonality, personality, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterProficencies = `-- name: SetCharacterProficencies :one
+UPDATE characters
+SET proficencies = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterProficencies
+//
+//	UPDATE characters
+//	SET proficencies = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterProficencies(ctx context.Context, proficencies interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterProficencies, proficencies, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterRace = `-- name: SetCharacterRace :one
+UPDATE characters
+SET race = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterRace
+//
+//	UPDATE characters
+//	SET race = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterRace(ctx context.Context, race interface{}, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterRace, race, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterStrenghtProf = `-- name: SetCharacterStrenghtProf :one
+UPDATE characters
+SET strenght_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterStrenghtProf
+//
+//	UPDATE characters
+//	SET strenght_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterStrenghtProf(ctx context.Context, strenghtProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterStrenghtProf, strenghtProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterTempHp = `-- name: SetCharacterTempHp :one
+UPDATE characters
+SET temp_hp = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterTempHp
+//
+//	UPDATE characters
+//	SET temp_hp = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterTempHp(ctx context.Context, tempHp int64, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterTempHp, tempHp, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setCharacterWisdomProf = `-- name: SetCharacterWisdomProf :one
+UPDATE characters
+SET wisdom_prof = ?1
+WHERE id = ?2
+RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+`
+
+// SetCharacterWisdomProf
+//
+//	UPDATE characters
+//	SET wisdom_prof = ?1
+//	WHERE id = ?2
+//	RETURNING id, owner, name, race, background, alignment, experience, strenght_prof, dexterity_prof, constitution_prof, intelligence_prof, wisdom_prof, charisma_prof, armor_class, max_hp, current_hp, temp_hp, death_success, death_fail, proficencies, equipment, coins_copper, coins_silver, coins_electrum, coins_gold, coins_platinum, personality, ideals, bonds, flaws
+func (q *Queries) SetCharacterWisdomProf(ctx context.Context, wisdomProf bool, iD int64) (Character, error) {
+	row := q.db.QueryRowContext(ctx, setCharacterWisdomProf, wisdomProf, iD)
+	var i Character
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Name,
+		&i.Race,
+		&i.Background,
+		&i.Alignment,
+		&i.Experience,
+		&i.StrenghtProf,
+		&i.DexterityProf,
+		&i.ConstitutionProf,
+		&i.IntelligenceProf,
+		&i.WisdomProf,
+		&i.CharismaProf,
+		&i.ArmorClass,
+		&i.MaxHp,
+		&i.CurrentHp,
+		&i.TempHp,
+		&i.DeathSuccess,
+		&i.DeathFail,
+		&i.Proficencies,
+		&i.Equipment,
+		&i.CoinsCopper,
+		&i.CoinsSilver,
+		&i.CoinsElectrum,
+		&i.CoinsGold,
+		&i.CoinsPlatinum,
+		&i.Personality,
+		&i.Ideals,
+		&i.Bonds,
+		&i.Flaws,
+	)
+	return i, err
+}
+
+const setUserName = `-- name: SetUserName :one
 UPDATE users
-SET role = "admin"
-WHERE id = ?1
+SET name = ?1
+WHERE id = ?2
 RETURNING id, name, passwd, salt, role
 `
 
-// SetUserAdmin
+// SetUserName
 //
 //	UPDATE users
-//	SET role = "admin"
-//	WHERE id = ?1
+//	SET name = ?1
+//	WHERE id = ?2
 //	RETURNING id, name, passwd, salt, role
-func (q *Queries) SetUserAdmin(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRowContext(ctx, setUserAdmin, id)
+func (q *Queries) SetUserName(ctx context.Context, name string, iD int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, setUserName, name, iD)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -221,6 +1943,114 @@ func (q *Queries) SetUserAdmin(ctx context.Context, id int64) (User, error) {
 		&i.Passwd,
 		&i.Salt,
 		&i.Role,
+	)
+	return i, err
+}
+
+const setUserPassword = `-- name: SetUserPassword :one
+UPDATE users
+SET passwd = ?1,
+    salt = ?2
+WHERE id = ?3
+RETURNING id, name, passwd, salt, role
+`
+
+// SetUserPassword
+//
+//	UPDATE users
+//	SET passwd = ?1,
+//	    salt = ?2
+//	WHERE id = ?3
+//	RETURNING id, name, passwd, salt, role
+func (q *Queries) SetUserPassword(ctx context.Context, passwd []byte, salt []byte, iD int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, setUserPassword, passwd, salt, iD)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Passwd,
+		&i.Salt,
+		&i.Role,
+	)
+	return i, err
+}
+
+const setUserRole = `-- name: SetUserRole :one
+UPDATE users
+SET role = ?1
+WHERE id = ?2
+RETURNING id, name, passwd, salt, role
+`
+
+// SetUserRole
+//
+//	UPDATE users
+//	SET role = ?1
+//	WHERE id = ?2
+//	RETURNING id, name, passwd, salt, role
+func (q *Queries) SetUserRole(ctx context.Context, role interface{}, iD int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, setUserRole, role, iD)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Passwd,
+		&i.Salt,
+		&i.Role,
+	)
+	return i, err
+}
+
+const updateCharacterScore = `-- name: UpdateCharacterScore :one
+UPDATE character_scores
+SET value = ?1,
+    operation = ?2
+RETURNING id, score, name, character, value, operation
+`
+
+// UpdateCharacterScore
+//
+//	UPDATE character_scores
+//	SET value = ?1,
+//	    operation = ?2
+//	RETURNING id, score, name, character, value, operation
+func (q *Queries) UpdateCharacterScore(ctx context.Context, value int64, operation interface{}) (CharacterScore, error) {
+	row := q.db.QueryRowContext(ctx, updateCharacterScore, value, operation)
+	var i CharacterScore
+	err := row.Scan(
+		&i.ID,
+		&i.Score,
+		&i.Name,
+		&i.Character,
+		&i.Value,
+		&i.Operation,
+	)
+	return i, err
+}
+
+const updateCharacterSpeed = `-- name: UpdateCharacterSpeed :one
+UPDATE character_speeds
+SET value = ?1,
+    operation = ?2
+RETURNING id, character, value, name, type, operation
+`
+
+// UpdateCharacterSpeed
+//
+//	UPDATE character_speeds
+//	SET value = ?1,
+//	    operation = ?2
+//	RETURNING id, character, value, name, type, operation
+func (q *Queries) UpdateCharacterSpeed(ctx context.Context, value int64, operation interface{}) (CharacterSpeed, error) {
+	row := q.db.QueryRowContext(ctx, updateCharacterSpeed, value, operation)
+	var i CharacterSpeed
+	err := row.Scan(
+		&i.ID,
+		&i.Character,
+		&i.Value,
+		&i.Name,
+		&i.Type,
+		&i.Operation,
 	)
 	return i, err
 }

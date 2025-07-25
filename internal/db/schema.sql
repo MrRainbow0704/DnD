@@ -6,6 +6,22 @@ CREATE TABLE IF NOT EXISTS users (
     role TEXT NOT NULL DEFAULT "user"
 );
 
+CREATE TABLE IF NOT EXISTS campaigns (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    desc TEXT NOT NULL DEFAULT "",
+    master INTEGER NOT NULL,
+    FOREIGN KEY (master) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS campaigns_characters (
+    character INTEGER NOT NULL,
+    campaign INTEGER NOT NULL,
+    PRIMARY KEY (character, campaign),
+    FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE,
+    FOREIGN KEY (campaign) REFERENCES campaings(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS characters (
     id INTEGER PRIMARY KEY,
     owner INTEGER NOT NULL,
@@ -78,36 +94,26 @@ CREATE TABLE IF NOT EXISTS scores (name TEXT PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS character_scores (
     id INTEGER PRIMARY KEY,
     score TEXT NOT NULL,
+    name TEXT NOT NULL,
     character INTEGER NOT NULL,
     value INTEGER NOT NULL,
-    operation TEXT NOT NULL DEFAULT "add" CHECK(
-        operation IN (
-            "add",
-            "set",
-            "set-if-not-grater",
-            "set-if-not-less"
-        )
-    ),
+    operation TEXT NOT NULL DEFAULT "add",
     FOREIGN KEY (score) REFERENCES scores(name) ON DELETE CASCADE,
-    FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE
+    FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE,
+    FOREIGN KEY (operation) REFERENCES operations(name) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS character_speeds (
     id INTEGER PRIMARY KEY,
     character INTEGER NOT NULL,
     value INTEGER NOT NULL,
+    name TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT "walk" CHECK(
         type IN ("walk", "fly", "swim", "climb", "burrow")
     ),
-    operation TEXT NOT NULL DEFAULT "add" CHECK(
-        operation IN (
-            "add",
-            "set",
-            "set-if-not-grater",
-            "set-if-not-less"
-        )
-    ),
-    FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE
+    operation TEXT NOT NULL DEFAULT "add",
+    FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE,
+    FOREIGN KEY (operation) REFERENCES operations(name) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS classes (name TEXT PRIMARY KEY);
@@ -140,6 +146,17 @@ CREATE TABLE IF NOT EXISTS character_skills (
     FOREIGN KEY (character) REFERENCES characters(id) ON DELETE CASCADE,
     FOREIGN KEY (skill) REFERENCES skills(name) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS operations (name TEXT PRIMARY KEY);
+
+INSERT
+    OR IGNORE INTO operations (name)
+VALUES ("add"),
+    ("sub"),
+    ("set"),
+    ("set-if-less"),
+    ("set-if-more"),
+    ("multiply");
 
 INSERT
     OR IGNORE INTO scores (name)

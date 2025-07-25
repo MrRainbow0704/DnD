@@ -102,6 +102,7 @@ go.work.sum
 
 configs/*
 !configs/template.json
+tmp
 
 # database
 db.sqlite3

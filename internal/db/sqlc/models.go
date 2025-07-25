@@ -13,6 +13,18 @@ type Background struct {
 	Desc string `db:"desc" json:"desc"`
 }
 
+type Campaign struct {
+	ID     int64       `db:"id" json:"id"`
+	Name   string      `db:"name" json:"name"`
+	Desc   interface{} `db:"desc" json:"desc"`
+	Master int64       `db:"master" json:"master"`
+}
+
+type CampaignsCharacter struct {
+	Character int64 `db:"character" json:"character"`
+	Campaign  int64 `db:"campaign" json:"campaign"`
+}
+
 type Character struct {
 	ID               int64       `db:"id" json:"id"`
 	Owner            int64       `db:"owner" json:"owner"`
@@ -56,6 +68,7 @@ type CharacterClass struct {
 type CharacterScore struct {
 	ID        int64       `db:"id" json:"id"`
 	Score     string      `db:"score" json:"score"`
+	Name      string      `db:"name" json:"name"`
 	Character int64       `db:"character" json:"character"`
 	Value     int64       `db:"value" json:"value"`
 	Operation interface{} `db:"operation" json:"operation"`
@@ -72,11 +85,16 @@ type CharacterSpeed struct {
 	ID        int64       `db:"id" json:"id"`
 	Character int64       `db:"character" json:"character"`
 	Value     int64       `db:"value" json:"value"`
+	Name      string      `db:"name" json:"name"`
 	Type      interface{} `db:"type" json:"type"`
 	Operation interface{} `db:"operation" json:"operation"`
 }
 
 type Class struct {
+	Name string `db:"name" json:"name"`
+}
+
+type Operation struct {
 	Name string `db:"name" json:"name"`
 }
 

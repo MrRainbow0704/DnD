@@ -21,6 +21,7 @@ Object.entries(hitdice).forEach((e) => {
 });
 let clsLevel: string = classes.join(" / ");
 let features: string = c.traits.map((e) => `${e.name}: ${e.desc}`).join("\n");
+let speeds: string = c.combat.speeds.map((e)=>`${e.value}m ${e.type}`).join("\n")
 </script>
 
 <form class="charsheet">
@@ -283,7 +284,7 @@ let features: string = c.traits.map((e) => `${e.name}: ${e.desc}`).join("\n");
 						<input
 							name="speed"
 							type="text"
-							value={`${c.combat.speed}m`} />
+							value={speeds} />
 					</div>
 				</div>
 				<div class="hp">

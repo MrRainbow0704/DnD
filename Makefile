@@ -7,11 +7,14 @@ PACKAGE := github.com/MrRainbow0704/DnD
 LDFLAGS := -ldflags="-X '$(PACKAGE)/internal/version.version=$(VERSION)-dev'"
 LDFLAGS_R := -ldflags="-X '$(PACKAGE)/internal/version.version=$(VERSION)' -H windowsgui"
 AIR_CONF := $(subst ${\n}${\n},${\n},$(subst @LDFLAGS@,$(subst ",\",$(LDFLAGS)),$(file < ./.air.toml)))
-.PHONY: build release clear go go_r
+.PHONY: build release clear web live pre-go go go_r
 
 build: clear web sqlc go
 
 release: clear web sqlc go_r
+
+web:
+	cd ./web && npm install && npm run build
 
 sqlc: 
 	go tool sqlc generate
@@ -32,9 +35,6 @@ live: pre-go
 	echo. > ./tmp/.air.toml
 	echo $(subst ${\n}, >> ./tmp/.air.toml ${\n}echo ,$(AIR_CONF)) >> ./tmp/.air.toml
 	go tool air -c ./tmp/.air.toml
-
-web:
-	cd ./web %% npm install && npm run build
 
 clear:
 	bash -c "rm -rf ./bin"

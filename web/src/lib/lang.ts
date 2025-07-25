@@ -30,17 +30,8 @@ export function t<K extends keyof typeof m>(
 }
 
 export function langName(l: Lang): string {
-	return new Intl.DisplayNames(l, {
+	const s =  new Intl.DisplayNames(l, {
 		type: "language",
 	}).of(l)!;
-}
-
-export function langFlag(l: Lang): string {
-	if (l === "en") {
-		l = "gb" as Lang;
-	}
-	let first = l.charCodeAt(0) + 127365;
-	let second = l.charCodeAt(1) + 127365;
-	let flag = `\\0${first.toString(16)}\\0${second.toString(16)}`;
-	return flag;
+	return String(s[0]).toUpperCase() + String(s).slice(1);
 }

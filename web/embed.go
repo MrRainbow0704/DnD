@@ -21,10 +21,11 @@ func (h HTMLFS) Open(name string) (fs.File, error) {
 	return h.d.Open(name)
 }
 
+//go:embed all:build
+var buildDir embed.FS
 var (
-	//go:embed all:build
-	buildDir embed.FS
-	Router   = chi.NewRouter()
+	Router  = chi.NewRouter()
+	ServeFS HTMLFS
 )
 
 func init() {
@@ -32,6 +33,8 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	ServeFS = HTMLFS{d: sub}
+
 	Router.Use(middleware.StripSlashes)
-	Router.Handle("/*", http.FileServerFS(HTMLFS{d: sub}))
+	Router.Handle("/*", http.FileServerFS(ServeFS))
 }

@@ -1,6 +1,8 @@
 package utils
 
-
+import (
+	"github.com/go-chi/jwtauth/v5"
+)
 
 const (
 	JWTIDKey   = "JWT.key.user_id"
@@ -8,6 +10,8 @@ const (
 )
 
 const (
-	RoleAdmin = "role.admin"
-	RoleUser  = "role.user"
+	RoleAdmin = "admin"
+	RoleUser  = "user"
 )
+
+var TokenAuth = jwtauth.New("HS256", []byte(cnf.JWTKey), nil)

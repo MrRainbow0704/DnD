@@ -1,14 +1,15 @@
-export type Class = {
-	name: string;
-	level: number;
-	hitdie: number;
-};
+import type { Errors } from "$lib";
 
 export type Character = {
+	owner: number;
 	charname: string;
 	otherprofs: string;
 	misc: {
-		classlevel: Class[];
+		classlevel: {
+			name: string;
+			level: number;
+			hitdie: number;
+		}[];
 		background: string;
 		playername: string;
 		race: string;
@@ -152,3 +153,18 @@ export type Character = {
 		desc: string;
 	}[];
 };
+
+export async function getCharacter(id: number): Promise<Character> {
+	const res = await fetch(`/api/v1/characters/${id}`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+	const { errors, character }: { errors: Errors; character: Character } =
+		await res.json();
+	if (Object.entries(errors).length) {
+		throw new Error("Errore in getCharacter()", { cause: errors });
+	}
+	return character;
+}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/MrRainbow0704/DnD/api/handler"
@@ -37,20 +38,47 @@ func init() {
 			w,
 			http.StatusOK,
 			map[string]any{"routes": allRoutes},
-			nil,
 		)
 	})
-	Router.Get("/t", func(w http.ResponseWriter, r *http.Request) {
-		utils.SendJSON(w, http.StatusOK, nil, nil)
-	})
 	Router.Post("/login", handler.Login)
-	Router.Post("/user", handler.CreateUser)
-	Router.Group(func(r chi.Router) {
+	Router.Get("/users/{id}", handler.GetUser)
+	Router.Post("/users", handler.CreateUser)
+	Router.Get("/campaigns/{id}", handler.GetCampaign)
+	Router.Get("/characters/{id}", handler.GetCharacter)
+	Router.Group(func(r chi.Router) { // Authenticated routes
 		r.Use(jwtauth.Verifier(utils.TokenAuth))
 		r.Use(middleware.Authenticator(utils.TokenAuth))
 
+		// r.Get("/me", handler.GetThisUser)
+		// r.Patch("/me", handler.EditThisUser)
+		// r.Delete("/me", handler.DeleteThisUser)
 		r.Post("/logout", handler.Logout)
-		r.Post("/character", handler.CreateCharacter)
-		r.Get("/character/{id}", handler.GetCharacter)
+		r.Post("/campaigns", handler.CreateCampaign)
+		// r.Patch("/campaigns/{id}", handler.EditCampaign)
+		r.Post("/characters", handler.CreateCharacter)
+		// r.Patch("/characters/{id}", handler.EditCharacter)
+		Router.Group(func(ar chi.Router) { // Admin routes
+			ar.Use(middleware.IsAdmin)
+
+			// ar.Delete("/users/{id}", DeleteUser)
+			// ar.Patch("/users/{id}", EditUser)
+		})
+		Router.Group(func(or chi.Router) { // Owner routes
+			or.Use(middleware.IsOwner)
+
+			// or.Delete("/characters/{id}", DeleteCharacter)
+			// or.Patch("/characters/{id}", EditCharacter)
+			// or.Delete("/campaigns/{id}", DeleteCampaign)
+			// or.Patch("/campaigns/{id}", EditCampaign)
+		})
+	})
+	Router.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		utils.ErrorJSON(
+			w,
+			http.StatusNotFound,
+			map[string]error{
+				"NOT_FOUND": fmt.Errorf("Pagina non trovata"),
+			},
+		)
 	})
 }

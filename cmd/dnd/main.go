@@ -9,7 +9,6 @@ import (
 	"github.com/MrRainbow0704/DnD/api"
 	"github.com/MrRainbow0704/DnD/internal/config"
 	"github.com/MrRainbow0704/DnD/internal/log"
-	"github.com/MrRainbow0704/DnD/internal/utils"
 	"github.com/MrRainbow0704/DnD/internal/version"
 	"github.com/MrRainbow0704/DnD/web"
 
@@ -45,7 +44,6 @@ func run() error {
 		},
 	)
 	r.Use(
-		chi_middleware.SupressNotFound(r),
 		chi_middleware.RequestID,
 		chi_middleware.RealIP,
 		chi_middleware.Logger,
@@ -65,7 +63,7 @@ func run() error {
 	r.Mount("/", web.Router)
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		utils.SendJSON(w, http.StatusNotFound, nil, nil)
+		http.ServeFileFS(w, r, web.ServeFS, "404.html")
 	})
 
 	// Run the server
