@@ -76,9 +76,7 @@ func init() {
 		utils.ErrorJSON(
 			w,
 			http.StatusNotFound,
-			map[string]error{
-				"NOT_FOUND": fmt.Errorf("Pagina non trovata"),
-			},
+			map[string]error{"NOT_FOUND": fmt.Errorf("Pagina non trovata")},
 		)
 	})
 }

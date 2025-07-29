@@ -12,9 +12,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+//go:embed schema.sql
+var ddl string
+
 var (
-	//go:embed schema.sql
-	ddl     string
 	cnf     = config.Get()
 	queries *sqlc.Queries
 )

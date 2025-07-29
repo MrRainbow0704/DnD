@@ -8,6 +8,7 @@ import (
 func SendJSON(w http.ResponseWriter, s int, m map[string]any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(s)
+
 	if m == nil {
 		m = map[string]any{}
 	}
@@ -18,6 +19,7 @@ func SendJSON(w http.ResponseWriter, s int, m map[string]any) {
 func ErrorJSON(w http.ResponseWriter, s int, e map[string]error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(s)
+
 	m := map[string]any{}
 	if e != nil {
 		errs := make(map[string]string, len(e))
