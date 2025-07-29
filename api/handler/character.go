@@ -87,7 +87,6 @@ func GetCharacter(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-
 	utils.SendJSON(
 		w,
 		http.StatusInternalServerError,

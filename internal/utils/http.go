@@ -3,24 +3,26 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
+
+	t "github.com/MrRainbow0704/DnD/internal/types"
 )
 
-func SendJSON(w http.ResponseWriter, s int, m map[string]any) {
+func SendJSON(w http.ResponseWriter, s int, m t.AnyMap) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(s)
 
 	if m == nil {
-		m = map[string]any{}
+		m = t.AnyMap{}
 	}
 
 	json.NewEncoder(w).Encode(m)
 }
 
-func ErrorJSON(w http.ResponseWriter, s int, e map[string]error) {
+func ErrorJSON(w http.ResponseWriter, s int, e t.ErrorMap) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(s)
 
-	m := map[string]any{}
+	m := t.AnyMap{}
 	if e != nil {
 		errs := make(map[string]string, len(e))
 		for k, v := range e {

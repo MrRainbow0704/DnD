@@ -3,10 +3,11 @@ package handler
 import (
 	"github.com/MrRainbow0704/DnD/internal/config"
 	database "github.com/MrRainbow0704/DnD/internal/db"
+	t "github.com/MrRainbow0704/DnD/internal/types"
 )
 
-type M map[string]any   // Alias for map[string]any
-type E map[string]error // Alias for map[string]error
+type M = t.AnyMap
+type E = t.ErrorMap
 
 var (
 	db  = database.Get() // Database instance

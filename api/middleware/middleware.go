@@ -10,16 +10,16 @@ import (
 	"strings"
 
 	database "github.com/MrRainbow0704/DnD/internal/db"
+	t "github.com/MrRainbow0704/DnD/internal/types"
 	"github.com/MrRainbow0704/DnD/internal/utils"
 	"github.com/go-chi/jwtauth/v5"
 )
 
-type CtxKey string
-type E map[string]error // Alias for map[string]error
+type E = t.ErrorMap
 
 const (
-	CtxUserID   CtxKey = "context.key.user_id"
-	CtxUserRole CtxKey = "context.key.user_role"
+	CtxUserID   t.CtxKey = "context.key.user_id"
+	CtxUserRole t.CtxKey = "context.key.user_role"
 )
 
 const (
