@@ -8,7 +8,8 @@ const config = {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter({
-			strict: false,
+			strict: true,
+			fallback: "index.html",
 		}),
 		alias: {
 			$src: "./src",

@@ -62,10 +62,6 @@ func run() error {
 	// Mount webserver router
 	r.Mount("/", web.Router)
 
-	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFileFS(w, r, web.ServeFS, "404.html")
-	})
-
 	// Run the server
 	s := &http.Server{
 		Addr:    cnf.Address,
