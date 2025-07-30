@@ -161,8 +161,8 @@ let character: Character = {
 		{ name: "Scurovisione", desc: "Vedo al buio per 18m" },
 	],
 };
-// let character: Character = {} as Character;
-let errors: Errors = {};
+// let character: Character = $state({} as Character);
+let errors: Errors = $state({} as Errors);
 // const id = parseInt(page.params.slug);
 // getCharacter(id)
 // 	.then((c) => (character = c))
@@ -171,7 +171,7 @@ let errors: Errors = {};
 // 	});
 </script>
 
-<div>
+<div id="errors">
 	{#if Object.entries(errors)}
 		{#each Object.entries(errors) as [k, v]}
 			<p><strong>{k}:</strong> {v}</p>
@@ -181,15 +181,15 @@ let errors: Errors = {};
 <CharacterSheet c={character} />
 
 <style>
-div {
+div#errors {
 	width: 20rem;
 	max-width: 80%;
-}
-p {
-	width: 100%;
-	text-align: center;
-	padding: 0.5rem;
-	margin: 0.1rem;
-	background-color: red;
+	p {
+		width: 100%;
+		text-align: center;
+		padding: 0.5rem;
+		margin: 0.1rem;
+		background-color: red;
+	}
 }
 </style>

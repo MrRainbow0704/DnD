@@ -3,8 +3,8 @@ import { page } from "$app/state";
 import { getCampaign, type Campaign } from "$src/lib/campaign";
 import type { Errors } from "$src/lib";
 
-let campaign: Campaign = {} as Campaign;
-let errors: Errors = {};
+let campaign: Campaign = $state({} as Campaign);
+let errors: Errors = $state({} as Errors);
 const id = parseInt(page.params.slug);
 getCampaign(id)
 	.then((c) => (campaign = c))
@@ -13,7 +13,7 @@ getCampaign(id)
 	});
 </script>
 
-<div>
+<div id="errors">
 	{#if Object.entries(errors)}
 		{#each Object.entries(errors) as [k, v]}
 			<p><strong>{k}:</strong> {v}</p>
@@ -23,15 +23,15 @@ getCampaign(id)
 {campaign}
 
 <style>
-div {
+div#errors {
 	width: 20rem;
 	max-width: 80%;
-}
-p {
-	width: 100%;
-	text-align: center;
-	padding: 0.5rem;
-	margin: 0.1rem;
-	background-color: red;
+	p {
+		width: 100%;
+		text-align: center;
+		padding: 0.5rem;
+		margin: 0.1rem;
+		background-color: red;
+	}
 }
 </style>

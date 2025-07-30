@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// Creates a secret of given lenght.
+// Creates a secret of given length.
 func RandomSecret(l uint32) ([]byte, error) {
 	s := make([]byte, l)
 	_, err := rand.Read(s)
