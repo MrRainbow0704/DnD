@@ -173,6 +173,139 @@ func (q *Queries) GetCharacter(ctx context.Context, id int64) (Character, error)
 	return i, err
 }
 
+const getCharacterScores = `-- name: GetCharacterScores :many
+SELECT id, score, name, character, value, operation
+FROM character_scores
+WHERE character = ?1
+    AND score = ?2
+`
+
+// GetCharacterScores
+//
+//	SELECT id, score, name, character, value, operation
+//	FROM character_scores
+//	WHERE character = ?1
+//	    AND score = ?2
+func (q *Queries) GetCharacterScores(ctx context.Context, character int64, score string) ([]CharacterScore, error) {
+	rows, err := q.db.QueryContext(ctx, getCharacterScores, character, score)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CharacterScore
+	for rows.Next() {
+		var i CharacterScore
+		if err := rows.Scan(
+			&i.ID,
+			&i.Score,
+			&i.Name,
+			&i.Character,
+			&i.Value,
+			&i.Operation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCharacterSkills = `-- name: GetCharacterSkills :one
+SELECT character, skill, prof, expert
+FROM character_skills
+WHERE character = ?1
+    AND skill = ?2
+LIMIT 1
+`
+
+// GetCharacterSkills
+//
+//	SELECT character, skill, prof, expert
+//	FROM character_skills
+//	WHERE character = ?1
+//	    AND skill = ?2
+//	LIMIT 1
+func (q *Queries) GetCharacterSkills(ctx context.Context, character int64, skill string) (CharacterSkill, error) {
+	row := q.db.QueryRowContext(ctx, getCharacterSkills, character, skill)
+	var i CharacterSkill
+	err := row.Scan(
+		&i.Character,
+		&i.Skill,
+		&i.Prof,
+		&i.Expert,
+	)
+	return i, err
+}
+
+const getCharacterSpeeds = `-- name: GetCharacterSpeeds :many
+SELECT id, character, value, name, type, operation
+FROM character_speeds
+WHERE character = ?1
+    AND type = ?2
+`
+
+// GetCharacterSpeeds
+//
+//	SELECT id, character, value, name, type, operation
+//	FROM character_speeds
+//	WHERE character = ?1
+//	    AND type = ?2
+func (q *Queries) GetCharacterSpeeds(ctx context.Context, character int64, type_ interface{}) ([]CharacterSpeed, error) {
+	rows, err := q.db.QueryContext(ctx, getCharacterSpeeds, character, type_)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CharacterSpeed
+	for rows.Next() {
+		var i CharacterSpeed
+		if err := rows.Scan(
+			&i.ID,
+			&i.Character,
+			&i.Value,
+			&i.Name,
+			&i.Type,
+			&i.Operation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSkillScore = `-- name: GetSkillScore :one
+SELECT name, score
+FROM skills
+WHERE name = ?1
+LIMIT 1
+`
+
+// GetSkillScore
+//
+//	SELECT name, score
+//	FROM skills
+//	WHERE name = ?1
+//	LIMIT 1
+func (q *Queries) GetSkillScore(ctx context.Context, skill string) (Skill, error) {
+	row := q.db.QueryRowContext(ctx, getSkillScore, skill)
+	var i Skill
+	err := row.Scan(&i.Name, &i.Score)
+	return i, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, name, passwd, salt, role
 FROM users

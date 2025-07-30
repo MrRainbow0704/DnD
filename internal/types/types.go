@@ -11,8 +11,8 @@ type ErrorMap map[string]error
 
 type ClassLevel struct {
 	Name   string `json:"name"`
-	Level  int    `json:"level"`
-	HitDie int    `json:"hitdie"`
+	Level  int64  `json:"level"`
+	HitDie int64  `json:"hitdie"`
 }
 
 type Misc struct {
@@ -21,16 +21,16 @@ type Misc struct {
 	PlayerName string       `json:"playername"`
 	Race       string       `json:"race"`
 	Alignment  string       `json:"alignment"`
-	Experience int          `json:"experience"`
+	Experience int64        `json:"experience"`
 }
 
 type Scores struct {
-	Strength     int `json:"strength"`
-	Dexterity    int `json:"dexterity"`
-	Constitution int `json:"constitution"`
-	Intelligence int `json:"intelligence"`
-	Wisdom       int `json:"wisdom"`
-	Charisma     int `json:"charisma"`
+	Strength     int64 `json:"strength"`
+	Dexterity    int64 `json:"dexterity"`
+	Constitution int64 `json:"constitution"`
+	Intelligence int64 `json:"intelligence"`
+	Wisdom       int64 `json:"wisdom"`
+	Charisma     int64 `json:"charisma"`
 }
 
 type Saves struct {
@@ -71,32 +71,32 @@ type Skills struct {
 
 type Speed struct {
 	Type  string `json:"type"`
-	Value int    `json:"value"`
+	Value int64  `json:"value"`
 }
 
 type Attack struct {
 	Name   string `json:"name"`
-	Bonus  int    `json:"bonus"`
+	Bonus  int64  `json:"bonus"`
 	Damage string `json:"damage"`
 }
 
 type Combat struct {
-	AC           int      `json:"ac"`
-	MaxHP        int      `json:"maxhp"`
-	CurrentHP    int      `json:"currenthp"`
-	TempHP       int      `json:"temphp"`
-	DeathSuccess int      `json:"deathsuccess"`
-	DeathFail    int      `json:"deathfail"`
+	AC           int64    `json:"ac"`
+	MaxHP        int64    `json:"maxhp"`
+	CurrentHP    int64    `json:"currenthp"`
+	TempHP       int64    `json:"temphp"`
+	DeathSuccess int64    `json:"deathsuccess"`
+	DeathFail    int64    `json:"deathfail"`
 	Speeds       []Speed  `json:"speeds"`
 	Attacks      []Attack `json:"attacks"`
 }
 
 type Money struct {
-	Copper   int `json:"copper"`
-	Silver   int `json:"silver"`
-	Electrum int `json:"electrum"`
-	Gold     int `json:"gold"`
-	Platinum int `json:"platinum"`
+	Copper   int64 `json:"copper"`
+	Silver   int64 `json:"silver"`
+	Electrum int64 `json:"electrum"`
+	Gold     int64 `json:"gold"`
+	Platinum int64 `json:"platinum"`
 }
 
 type Equipment struct {

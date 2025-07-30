@@ -289,6 +289,12 @@ SET value = sqlc.arg(value),
     operation = sqlc.arg(operation)
 RETURNING *;
 
+-- name: GetCharacterScores :many
+SELECT *
+FROM character_scores
+WHERE character = sqlc.arg(character)
+    AND score = sqlc.arg(score);
+
 -- name: NewCharacterSpeed :one
 INSERT INTO character_speeds (name, character, type, value, operation)
 VALUES (
@@ -309,3 +315,22 @@ UPDATE character_speeds
 SET value = sqlc.arg(value),
     operation = sqlc.arg(operation)
 RETURNING *;
+
+-- name: GetCharacterSpeeds :many
+SELECT *
+FROM character_speeds
+WHERE character = sqlc.arg(character)
+    AND type = sqlc.arg(type);
+
+-- name: GetCharacterSkills :one
+SELECT *
+FROM character_skills
+WHERE character = sqlc.arg(character)
+    AND skill = sqlc.arg(skill)
+LIMIT 1;
+
+-- name: GetSkillScore :one
+SELECT *
+FROM skills
+WHERE name = sqlc.arg(skill)
+LIMIT 1;
