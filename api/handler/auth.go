@@ -72,10 +72,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	// Encode the user's ID into the JWT and return it to the user.
 	_, tokenString, err := utils.TokenAuth.Encode(map[string]any{
-		utils.JWTIDKey:   u.ID,
-		utils.JWTRoleKey: u.Role,
-		"exp":            time.Now().Add(time.Hour * 72),
-		"iat":            time.Now(),
+		"sub":            u.ID,                           // Subject
+		"exp":            time.Now().Add(time.Hour * 72), // Expiration time
+		"nbf":            time.Now(),                     // Not before
+		"iat":            time.Now(),                     // Issued at
+		utils.JWTRoleKey: u.Role,                         // User role	
 	})
 	if err != nil {
 		utils.ErrorJSON(

@@ -50,9 +50,8 @@ func Authenticator(ja *jwtauth.JWTAuth) func(http.Handler) http.Handler {
 				)
 				return
 			}
-
 			claims := token.PrivateClaims()
-			ctx := context.WithValue(r.Context(), CtxUserID, claims[utils.JWTIDKey])
+			ctx := context.WithValue(r.Context(), CtxUserID, token.Subject())
 			ctx = context.WithValue(ctx, CtxUserRole, claims[utils.JWTRoleKey])
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
