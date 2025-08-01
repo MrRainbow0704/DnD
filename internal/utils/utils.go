@@ -67,6 +67,9 @@ func getSkill(ctx context.Context, c sqlc.Character, name string) t.Skill {
 		return t.Skill{}
 	}
 	s, err := db.GetSkillScore(ctx, skill.Skill)
+	if err != nil {
+		return t.Skill{}
+	}
 	return t.Skill{Score: s.Score, Proficiency: skill.Prof, Expertise: skill.Expert}
 }
 
