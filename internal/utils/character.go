@@ -13,7 +13,6 @@ type calculableValues interface {
 	GetOperation() string
 }
 
-
 func calculateValues[T calculableValues](v []T) int64 {
 	var val int64
 	var max int64 = math.MinInt64
@@ -50,39 +49,39 @@ func calculateValues[T calculableValues](v []T) int64 {
 	return val
 }
 
-func getScore(ctx context.Context, c sqlc.Character, name string) int64 {
+func getScore(ctx context.Context, c sqlc.Character, name string) (int64, error) {
 	scores, err := db.GetCharacterScores(ctx, c.ID, name)
 	if err != nil {
-		return -1
+		return 0, err
 	}
-	return calculateValues(scores)
+	return calculateValues(scores), nil
 }
 
-func getSkill(ctx context.Context, c sqlc.Character, name string) t.Skill {
+func getSkill(ctx context.Context, c sqlc.Character, name string) (t.Skill, error) {
 	skill, err := db.GetCharacterSkills(ctx, c.ID, name)
 	if err != nil {
-		return t.Skill{}
+		return t.Skill{}, err
 	}
 	s, err := db.GetSkillScore(ctx, skill.Skill)
 	if err != nil {
-		return t.Skill{}
+		return t.Skill{}, err
 	}
-	return t.Skill{Score: s.Score, Proficiency: skill.Prof, Expertise: skill.Expert}
+	return t.Skill{Score: s.Score, Proficiency: skill.Prof, Expertise: skill.Expert}, nil
 }
 
-func getSpeeds(ctx context.Context, c sqlc.Character) []t.Speed {
+func getSpeeds(ctx context.Context, c sqlc.Character) ([]t.Speed, error) {
 	speeds := make([]t.Speed, 4)
 	for i, tp := range []string{"walk", "swim", "fly", "climb"} {
 		speed, err := db.GetCharacterSpeeds(ctx, c.ID, tp)
 		if err != nil {
-			return []t.Speed{}
+			return []t.Speed{}, err
 		}
 		speeds[i] = t.Speed{
 			Type:  tp,
 			Value: calculateValues(speed),
 		}
 	}
-	return speeds
+	return speeds, nil
 }
 
 func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error) {
@@ -92,7 +91,49 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 		return t.Character{}, err
 	}
 
-	n := t.Character{
+	scores := make([]int64, 6)
+	for i, stat := range []string{"strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"} {
+		s, err := getScore(ctx, c, stat)
+		if err != nil {
+			return t.Character{}, err
+		}
+		scores[i] = s
+	}
+
+	skills := make([]t.Skill, 18)
+	for i, skill := range []string{
+		"athletics",
+		"acrobatics",
+		"sleightofhand",
+		"stealth",
+		"arcana",
+		"historical",
+		"investigation",
+		"nature",
+		"religion",
+		"animalhandling",
+		"insight",
+		"medicine",
+		"perception",
+		"survival",
+		"deception",
+		"intimidation",
+		"performance",
+		"persuasion",
+	} {
+		s, err := getSkill(ctx, c, skill)
+		if err != nil {
+			return t.Character{}, err
+		}
+		skills[i] = s
+	}
+
+	speeds, err := getSpeeds(ctx, c)
+	if err != nil {
+		return t.Character{}, err
+	}
+
+	return t.Character{
 		Owner:      c.Owner,
 		CharName:   c.Name,
 		OtherProfs: c.Proficencies.(string),
@@ -105,12 +146,12 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 			Experience: c.Experience,
 		},
 		Scores: t.Scores{
-			Strength:     getScore(ctx, c, "strength"),
-			Dexterity:    getScore(ctx, c, "dexterity"),
-			Constitution: getScore(ctx, c, "constitution"),
-			Intelligence: getScore(ctx, c, "intelligence"),
-			Wisdom:       getScore(ctx, c, "wisdom"),
-			Charisma:     getScore(ctx, c, "charisma"),
+			Strength:     scores[0],
+			Dexterity:    scores[1],
+			Constitution: scores[2],
+			Intelligence: scores[3],
+			Wisdom:       scores[4],
+			Charisma:     scores[5],
 		},
 		Saves: t.Saves{
 			Strength:     c.StrenghtProf,
@@ -121,24 +162,24 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 			Charisma:     c.CharismaProf,
 		},
 		Skills: t.Skills{
-			Athletics:      getSkill(ctx, c, "athletics"),
-			Acrobatics:     getSkill(ctx, c, "acrobatics"),
-			SleightOfHand:  getSkill(ctx, c, "sleightofhand"),
-			Stealth:        getSkill(ctx, c, "stealth"),
-			Arcana:         getSkill(ctx, c, "arcana"),
-			Historical:     getSkill(ctx, c, "historical"),
-			Investigation:  getSkill(ctx, c, "investigation"),
-			Nature:         getSkill(ctx, c, "nature"),
-			Religion:       getSkill(ctx, c, "religion"),
-			AnimalHandling: getSkill(ctx, c, "animalhandling"),
-			Insight:        getSkill(ctx, c, "insight"),
-			Medicine:       getSkill(ctx, c, "medicine"),
-			Perception:     getSkill(ctx, c, "perception"),
-			Survival:       getSkill(ctx, c, "survival"),
-			Deception:      getSkill(ctx, c, "deception"),
-			Intimidation:   getSkill(ctx, c, "intimidation"),
-			Performance:    getSkill(ctx, c, "performance"),
-			Persuasion:     getSkill(ctx, c, "persuasion"),
+			Athletics:      skills[0],
+			Acrobatics:     skills[1],
+			SleightOfHand:  skills[2],
+			Stealth:        skills[3],
+			Arcana:         skills[4],
+			Historical:     skills[5],
+			Investigation:  skills[6],
+			Nature:         skills[7],
+			Religion:       skills[8],
+			AnimalHandling: skills[9],
+			Insight:        skills[10],
+			Medicine:       skills[11],
+			Perception:     skills[12],
+			Survival:       skills[13],
+			Deception:      skills[14],
+			Intimidation:   skills[15],
+			Performance:    skills[16],
+			Persuasion:     skills[17],
 		},
 		Combat: t.Combat{
 			AC:           c.ArmorClass,
@@ -147,7 +188,7 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 			TempHP:       c.TempHp,
 			DeathSuccess: c.DeathSuccess,
 			DeathFail:    c.DeathFail,
-			Speeds:       getSpeeds(ctx, c),
+			Speeds:       speeds,
 			Attacks:      []t.Attack{}, // TODO
 		},
 		Equipment: t.Equipment{
@@ -167,6 +208,5 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 			Flaws:       c.Flaws.(string),
 		},
 		Traits: []t.Trait{}, // TODO
-	}
-	return n, nil
+	}, nil
 }

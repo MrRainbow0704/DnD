@@ -50,12 +50,22 @@ func CreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pc, err := utils.PrepareCharacter(r.Context(), c)
+	if err != nil {
+		utils.ErrorJSON(
+			w,
+			http.StatusInternalServerError,
+			E{internalError: fmt.Errorf("error preparing character data")},
+		)
+		return
+	}
+
 	utils.SendJSON(
 		w,
 		http.StatusOK,
 		M{
 			msgKey:       "Character created successfully",
-			characterKey: c,
+			characterKey: pc,
 		},
 	)
 }
