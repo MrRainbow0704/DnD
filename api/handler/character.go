@@ -20,7 +20,7 @@ func CreateCharacter(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJSON(
 			w,
 			http.StatusBadRequest,
-			E{jsonDecodeError: fmt.Errorf("Error deconding JSON")},
+			E{jsonDecodeError: fmt.Errorf("error deconding JSON")},
 		)
 		return
 	}
@@ -87,12 +87,23 @@ func GetCharacter(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+
+	pc, err := utils.PrepareCharacter(r.Context(), c)
+	if err != nil {
+		utils.ErrorJSON(
+			w,
+			http.StatusInternalServerError,
+			E{internalError: fmt.Errorf("error preparing character data")},
+		)
+		return
+	}
+
 	utils.SendJSON(
 		w,
 		http.StatusInternalServerError,
 		M{
 			msgKey:       "Character retrieved successfully",
-			characterKey: c,
+			characterKey: pc,
 		},
 	)
 }
