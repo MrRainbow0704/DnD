@@ -21,7 +21,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJSON(
 			w,
 			http.StatusBadRequest,
-			E{jsonDecodeError: fmt.Errorf("Error deconding JSON")},
+			E{jsonDecodeError: fmt.Errorf("error deconding JSON")},
 		)
 		return
 	}
