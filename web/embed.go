@@ -13,24 +13,16 @@ import (
 type HTMLFS struct {
 	d fs.FS
 }
+type WrappedWriter struct {
+	w        http.ResponseWriter
+	notFound *bool
+}
 
 func (h HTMLFS) Open(name string) (fs.File, error) {
 	if filepath.Ext(name) == "" {
 		name += ".html"
 	}
 	return h.d.Open(name)
-}
-
-//go:embed all:build
-var buildDir embed.FS
-var (
-	Router  = chi.NewRouter()
-	ServeFS HTMLFS
-)
-
-type WrappedWriter struct {
-	w        http.ResponseWriter
-	notFound *bool
 }
 
 func (w WrappedWriter) WriteHeader(statusCode int) {
@@ -50,6 +42,24 @@ func (w WrappedWriter) Write(b []byte) (int, error) {
 	return w.w.Write(b)
 }
 
+var (
+	//go:embed all:build
+	buildDir embed.FS
+	Router   = chi.NewRouter()
+	ServeFS  HTMLFS
+)
+
+func AnyHandler(w http.ResponseWriter, r *http.Request) {
+	nf := false
+	ww := WrappedWriter{w: w, notFound: &nf}
+	http.FileServerFS(ServeFS).ServeHTTP(ww, r)
+	if nf {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		http.ServeFileFS(w, r, ServeFS, "index.html")
+	}
+}
+
 func init() {
 	sub, err := fs.Sub(buildDir, "build")
 	if err != nil {
@@ -58,14 +68,5 @@ func init() {
 	ServeFS = HTMLFS{d: sub}
 
 	Router.Use(middleware.StripSlashes)
-	Router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-		nf := false
-		ww := WrappedWriter{w: w, notFound: &nf}
-		http.FileServerFS(ServeFS).ServeHTTP(ww, r)
-		if nf {
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
-			w.WriteHeader(http.StatusNotFound)
-			http.ServeFileFS(w, r, ServeFS, "index.html")
-		}
-	})
+	Router.HandleFunc("/*", AnyHandler)
 }
