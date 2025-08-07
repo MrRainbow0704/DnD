@@ -20,10 +20,12 @@ type E = t.ErrorMap
 const (
 	CtxUserID   t.CtxKey = "context.key.user_id"
 	CtxUserRole t.CtxKey = "context.key.user_role"
+	CtxPathID   t.CtxKey = "context.key.path_id"
 )
 
 const (
 	internalError   = "INTERNAL"
+	invalidError    = "INVALID"
 	emptyFieldError = "EMPTY_FIELD"
 	authError       = "UNAUTHORIZED"
 )
@@ -50,8 +52,19 @@ func Authenticator(ja *jwtauth.JWTAuth) func(http.Handler) http.Handler {
 				)
 				return
 			}
+
+			uid, err := strconv.ParseInt(token.Subject(), 10, 64)
+			if err != nil {
+				utils.ErrorJSON(
+					w,
+					http.StatusUnauthorized,
+					E{invalidError: fmt.Errorf("invalid user ID in token")},
+				)
+				return
+			}
+
 			claims := token.PrivateClaims()
-			ctx := context.WithValue(r.Context(), CtxUserID, token.Subject())
+			ctx := context.WithValue(r.Context(), CtxUserID, uid)
 			ctx = context.WithValue(ctx, CtxUserRole, claims[utils.JWTRoleKey])
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -148,5 +161,22 @@ func IsOwner(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func ExtractID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+		if err != nil {
+			utils.ErrorJSON(
+				w,
+				http.StatusBadRequest,
+				E{invalidError: fmt.Errorf("invalid ID in path")},
+			)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), CtxPathID, id)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

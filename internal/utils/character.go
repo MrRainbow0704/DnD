@@ -71,7 +71,7 @@ func getSkill(ctx context.Context, c sqlc.Character, name string) (t.Skill, erro
 
 func getSpeeds(ctx context.Context, c sqlc.Character) ([]t.Speed, error) {
 	speeds := make([]t.Speed, 4)
-	for i, tp := range []string{"walk", "swim", "fly", "climb"} {
+	for i, tp := range [4]string{"walk", "swim", "fly", "climb"} {
 		speed, err := db.GetCharacterSpeeds(ctx, c.ID, tp)
 		if err != nil {
 			return []t.Speed{}, err
@@ -92,7 +92,7 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 	}
 
 	scores := make([]int64, 6)
-	for i, stat := range []string{"strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"} {
+	for i, stat := range [6]string{"strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"} {
 		s, err := getScore(ctx, c, stat)
 		if err != nil {
 			return t.Character{}, err
@@ -101,7 +101,7 @@ func PrepareCharacter(ctx context.Context, c sqlc.Character) (t.Character, error
 	}
 
 	skills := make([]t.Skill, 18)
-	for i, skill := range []string{
+	for i, skill := range [18]string{
 		"athletics",
 		"acrobatics",
 		"sleightofhand",

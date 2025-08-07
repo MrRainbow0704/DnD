@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/MrRainbow0704/DnD/api/middleware"
 	"github.com/MrRainbow0704/DnD/internal/utils"
@@ -71,15 +70,7 @@ func CreateCharacter(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCharacter(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil {
-		utils.ErrorJSON(
-			w,
-			http.StatusBadRequest,
-			E{invalidParamError: fmt.Errorf("invalid character ID")},
-		)
-		return
-	}
+	id := r.Context().Value(middleware.CtxPathID).(int64)
 
 	c, err := db.GetCharacter(r.Context(), int64(id))
 	if errors.Is(err, sql.ErrNoRows) {

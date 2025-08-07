@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/MrRainbow0704/DnD/api/middleware"
 	"github.com/MrRainbow0704/DnD/internal/utils"
 )
 
@@ -72,17 +72,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil {
-		utils.ErrorJSON(
-			w,
-			http.StatusBadRequest,
-			E{invalidParamError: fmt.Errorf("invalid user ID")},
-		)
-		return
-	}
+	id := r.Context().Value(middleware.CtxPathID).(int64)
 
-	u, err := db.GetUser(r.Context(), int64(id))
+	u, err := db.GetUser(r.Context(), id)
 	if errors.Is(err, sql.ErrNoRows) {
 		utils.ErrorJSON(
 			w,
@@ -103,7 +95,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		w,
 		http.StatusInternalServerError,
 		M{
-			msgKey:  "Character retrieved successfully",
+			msgKey:  "User retrieved successfully",
 			userKey: u,
 		},
 	)
